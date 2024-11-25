@@ -16,13 +16,15 @@ Make sure this document compiles before you submit your answers.
 
 ## `roll_dice`
 
+```{r,message=F}
+library(tidyverse)
+```
+
 ```{r}
 roll_dice <- function() {
-  # Input: None
-  # Output: an integer from 1:12
-  # Description: Generate 2 random integers from 1 to 6 and sum them
-  
-  sample(1:6, 2, replace = T) %>% sum()
+  die1 <- sample(1:6, 1) 
+  die2 <- sample(1:6, 1) 
+  return(die1 + die2) 
 }
 ```
 
@@ -37,9 +39,44 @@ roll_dice()
 ## `simulate_craps_game`
 ```{r}
 simulate_craps_game <- function() {
-  # Input: 
-  # Output: 
-  # Description:
+  rolls <- data.frame(
+    ID = integer(),      
+    Roll = integer(),    
+    Outcome = character() 
+  )
+  
+  # Step 1: Come-out Roll
+  rolling_number <- 1
+  first_roll <- roll_dice()
+  rolls <- rbind(rolls, data.frame(ID = rolling_number, roll = first_roll, outcome = "continue"))
+  
+  if (first_roll == 7 || first_roll == 11) {
+    rolls$outcome[nrow(rolls)] <- "win"
+    print(rolls)
+    return("win")
+  } else if (first_roll == 2 || first_roll == 3 || first_roll == 12) {
+    rolls$outcome[nrow(rolls)] <- "lose"
+    print(rolls)
+    return("lose")
+  } else {
+    point <- first_roll
+  }
+  
+  while (TRUE) {
+    rolling_number <- rolling_number + 1
+    roll <- roll_dice()
+    rolls <- rbind(rolls, data.frame(ID = rolling_number, roll = roll, outcome = "continue"))
+    
+    if (roll == point) {
+      rolls$outcome[nrow(rolls)] <- "win"
+      print(rolls)
+      return("win")
+    } else if (roll == 7) {
+      rolls$outcome[nrow(rolls)] <- "lose"
+      print(rolls)
+      return("lose")
+    }
+  }
 }
 ```
 
@@ -50,27 +87,83 @@ simulate_craps_game()
 ## `summarize_craps_game`
 ```{r}
 summarize_craps_game <- function() {
-  # Input: 
-  # Output: 
-  # Description:
+  rolling_number <- 1
+  first_roll <- roll_dice() # First throw
+  
+  # Determine the outcome of the come-out roll
+  if (first_roll == 7 || first_roll == 11) {
+    return(data.frame(
+      n_roll = rolling_number,
+      point = first_roll,
+      outcome = "win"
+    ))
+  } else if (first_roll == 2 || first_roll == 3 || first_roll == 12) {
+    return(data.frame(
+      n_roll = rolling_number,
+      point = first_roll,
+      outcome = "lose"
+    ))
+  } else {
+    point <- first_roll
+  }
+  
+  # Step 2: Continue rolling until point or 7
+  while (TRUE) {
+    rolling_number <- rolling_number + 1
+    roll <- roll_dice()
+    
+    if (roll == point) {
+      return(data.frame(
+        n_roll = rolling_number,
+        point = first_roll,
+        outcome = "win"
+      ))
+    } else if (roll == 7) {
+      return(data.frame(
+        n_roll = rolling_number,
+        point = first_roll,
+        outcome = "lose"
+      ))
+    }
+  }
 }
 ```
 
 ```{r}
-simulate_craps_game() %>% summarize_craps_game()
+summarize_craps_game()
 ```
 
 ## `run_craps_simulation`
 ```{r}
 run_craps_simulation <- function(N) {
-  # Input: an integer N which determines the number of games to simulate
-  # Output: 
-  # Description:
+  results <- data.frame(
+    n_roll = integer(),
+    point = integer(),
+    outcome = character()
+  )
+  
+  for (i in 1:N) {
+    game_result <- summarize_craps_game()
+    results <- rbind(results, game_result)
+  }
+  
+  return(results)
 }
 ```
 
 ```{r}
 result <- run_craps_simulation(N=5) # demonstrate result
-result
+win_lose_percentage<- result %>% group_by(outcome) %>% count() %>% mutate( percentage= paste((n/nrow(result))*100,"%")) %>% ungroup()
+print(result)
+print(win_lose_percentage)
 ```
+
+
+
+
+
+
+
+
+
 

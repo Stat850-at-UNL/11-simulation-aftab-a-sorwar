@@ -1,0 +1,51 @@
+---
+title: "Probability question"
+author: "Aftab A Sorwar"
+format: html
+editor: visual
+---
+
+## question:
+
+Is the probability of winning on the first roll higher than the probability of winning in two or more throws?
+
+
+### solution
+Here the input will be:
+     N - Number of games to simulate in each run of run_craps_simulation
+     R - Number of repetitions to calculate probabilities
+and the output will be:
+       - Probability of winning on the first roll
+       - Probability of winning in two or more rolls
+       
+
+```{r}
+simulate_probabilities <- function(N, R) {
+  
+  first_roll_wins <- 0
+  multi_roll_wins <- 0
+  total_wins <- 0
+  
+  for (i in 1:R) {
+    results <- run_craps_simulation(N)
+    
+    first_roll_wins <- first_roll_wins + sum(results$n_roll == 1 & results$outcome == "win")
+    multi_roll_wins <- multi_roll_wins + sum(results$n_roll > 1 & results$outcome == "win")
+    total_wins <- total_wins + sum(results$outcome == "win")
+  }
+  
+  prob_first_roll_win <- first_roll_wins / total_wins
+  prob_multi_roll_win <- multi_roll_wins / total_wins
+  
+  return(cbind(
+    prob_first_roll_win = prob_first_roll_win,
+    prob_multi_roll_win = prob_multi_roll_win
+  ))
+}
+```
+
+```{r}
+simulate_probabilities(N = 10, R = 100)
+```
+
+
